@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import mapStyles from "./mapStyle/mapStyles";
 import countryList from './randomCountry/randomPull'
 import './App.css'
@@ -16,10 +16,11 @@ function App() {
     id: 'google-map-script',
     googleMapsApiKey: "AIzaSyCea_aNWrtFKwa63zn0e3xpkpBTe2QYAFU"
   })
-  const [map, setMap] = React.useState(null)
+  const [mapz, setMap] = React.useState(null)
   const onLoad = React.useCallback(function callback(map) {
     setMap(map)
-  }, [])
+    console.log(mapz)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const onUnmount = React.useCallback(function callback(map) {
     setMap(null)
   }, [])
@@ -61,6 +62,7 @@ function App() {
 
   useEffect(() => {
     generateNewList()
+    newCenter({ lat: -3.745, lng: -38.523 })
   }, []);
 
 
