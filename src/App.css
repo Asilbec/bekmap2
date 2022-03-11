@@ -21,7 +21,7 @@ h1 {
 .search {
   position: absolute;
   z-index: 30;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(92, 221, 53);
   width: 300px;
   height: 50px;
   position: absolute;
@@ -32,10 +32,13 @@ h1 {
   border-radius: 10px;
   display: flex;
   justify-content: space-around;
+  color: white;
 }
 
 .search p {
   margin: 0;
   line-height: 50px;
   font-size: 20px;
+  font-family: "Bebas Neue", cursive;
+  font-size: 1.7rem;
 }
