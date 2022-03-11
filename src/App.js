@@ -90,7 +90,7 @@ function App() {
 
       }
       else {
-        newCounter(counter - 1)
+        newCounter(0)
         axios.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + currentCountry + '&key=AIzaSyCea_aNWrtFKwa63zn0e3xpkpBTe2QYAFU').then(function (res) {
           const correct = (res.data.results[0].geometry.location)
           const lat = correct.lat
