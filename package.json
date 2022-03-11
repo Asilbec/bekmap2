@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.26.0",
     "framer": "^2.0.0",
+    "framer-motion": "^6.2.8",
     "motion": "^10.6.2",
     "random-country": "^1.0.1",
     "random-streetview": "^1.1.1",
