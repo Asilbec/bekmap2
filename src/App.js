@@ -7,7 +7,7 @@ import RoundThreeList from './randomCountry/sortedListThree';
 import './App.css'
 import axios from 'axios'
 import { motion, useAnimation } from "framer-motion"
-
+import { Marker } from '@react-google-maps/api';
 const mapContainerStyle = {
   height: "100%",
   width: "100vw",
@@ -150,6 +150,15 @@ function App() {
         onUnmount={onUnmount}
         zoom={2}
       >
+
+        <Marker
+          position={center}
+        />
+
+
+
+
+
       </GoogleMap>
 
     </motion.div>
