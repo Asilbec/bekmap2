@@ -11,6 +11,7 @@ import { Marker } from '@react-google-maps/api';
 const mapContainerStyle = {
   height: "100%",
   width: "100vw",
+  border: 'none'
 };
 var NEW_ZEALAND_BOUNDS = {
   north: 85,
@@ -18,11 +19,6 @@ var NEW_ZEALAND_BOUNDS = {
   west: -180,
   east: 180
 };
-
-
-/*
-
-*/
 
 
 
@@ -43,7 +39,26 @@ function App() {
     },
   }
 
+  const MenuAnimationVari = {
+    visible:
+    {
+      scale: 1, transition: {
+        duration: 0.2,
+      },
+
+    },
+    hidden:
+    {
+      scale: 0,
+      transition: { duration: 0.5 },
+    },
+  }
+
+
+
+
   const controls = useAnimation()
+  const showMenuAnimation = useAnimation()
 
 
   const { isLoaded } = useLoadScript({
@@ -54,6 +69,10 @@ function App() {
   console.log(mapz)
 
   const [counter, newCounter] = useState(0)
+  const [disableZoom, newDisable] = useState(false)
+  const [disableGesture, newGesture] = useState('none')
+  const [gotwrong, newGame] = useState(false)
+  const [prev, newPrev] = useState(0)
 
   const onUnmount = React.useCallback(function callback(map) {
     setMap(null)
@@ -61,19 +80,23 @@ function App() {
   const OPTIONS = {
     disableDefaultUI: true,
     keyboardShortcuts: false,
-    zoomControl: true,
     minZoom: 3,
     styles: mapStyles,
     restriction: {
       latLngBounds: NEW_ZEALAND_BOUNDS,
       strictBounds: false,
     },
+    gestureHandling: disableGesture
+    ,
+    zoomControl: disableZoom,
   }
   const mapRef = React.useRef();
   const onMapLoad = React.useCallback((map) => {
     mapRef.current = map;
 
   }, []);
+
+
 
   function onMapClick(e) {
     const lat = e.latLng.lat()
@@ -83,30 +106,47 @@ function App() {
       const formatted = country.formatted_address
       console.log(formatted)
       if (formatted === currentCountry) {
-        newCounter(counter + 1)
-        generateNewList()
-        controls.start('visible')
-
-
+        if (gotwrong === true) {
+          showMenuAnimation.start('visible')
+        } else {
+          newCounter(counter + 1)
+          generateNewList()
+          controls.start('visible')
+          newShown(false)
+        }
       }
       else {
-        newCounter(0)
+
+        const stored = localStorage.getItem('highScore')
+        console.log(stored)
+        if (counter > stored || stored === null) {
+          localStorage.setItem('highScore', counter)
+          newPrev(counter)
+        }
+        newDisable(true)
+        newGesture('none')
+        newShown(true)
+        newGame(true)
         axios.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + currentCountry + '&key=AIzaSyCea_aNWrtFKwa63zn0e3xpkpBTe2QYAFU').then(function (res) {
           const correct = (res.data.results[0].geometry.location)
           const lat = correct.lat
           const lng = correct.lng
-
           mapRef.current.panTo({ lat, lng })
           mapRef.current.setZoom(4);
           controls.start('hidden')
+          newCenter(
+            { lat: lat, lng: lng }
+          )
         })
       }
     })
   }
 
   const [center, newCenter] = useState(
-    { lat: -3.745, lng: -38.523 }
+    { lat: 27.115046560668105, lng: -45.60478891297624 }
   )
+
+  const [markerShown, newShown] = useState(false)
 
   const [currentCountry, newCountry] = useState('')
 
@@ -121,21 +161,55 @@ function App() {
     }
   }
 
+  function beginGame() {
+
+    newCounter(0)
+    showMenuAnimation.start('hidden')
+    newShown(false)
+    newDisable(false)
+    newGesture('Greedy')
+    generateNewList()
+    controls.start('visible')
+    newGame(false)
+    newCenter(
+      { lat: 27.115046560668105, lng: -45.60478891297624 }
+    )
+    mapRef.current.setZoom(2);
+  }
+
   useEffect(() => {
     generateNewList()
-    newCenter({ lat: -3.745, lng: -38.523 })
+    newCenter(
+      { lat: 27.115046560668105, lng: -45.60478891297624 }
+    )
+    if (localStorage.getItem('highScore') > 0) {
+      newPrev(localStorage.getItem('highScore'))
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   return isLoaded ? (
-    <motion.div style={{ height: '100vh' }}>
+    <motion.div className='App' style={{ height: '100vh' }}>
       <motion.div initial="visible"
         animate={controls}
         variants={variants}
-        onAnimationComplete={() => console.log('nice')}
         className='search'>
         <motion.p animate={{ fontSize: 19 }}>{currentCountry}</motion.p>
-        <motion.p>{counter}</motion.p>
+        <motion.p style={{ width: '60%', borderLeft: '2px solid white' }}>Score : {counter}</motion.p>
+      </motion.div>
+
+      <motion.div initial="visible"
+        animate={showMenuAnimation}
+        variants={MenuAnimationVari} className='MenuOverLay'>
+        <motion.div
+
+          className='menuOverlayContents'>
+          <div className='menuText' style={{ textAlign: 'center' }}>
+            <motion.h1 animate={{ fontSize: '50px' }}>Your Score Was : {counter}</motion.h1>
+            <motion.h3 animate={{ fontSize: '25px' }}>Preview High :  {prev}</motion.h3>
+          </div>
+          <motion.button whileHover={{ backgroundColor: 'rgb(92, 221, 53)', y: '-5px', scale: 1.01 }} transition={{ duration: 0.3 }} onClick={() => beginGame()} id='start'>START</motion.button>
+        </motion.div>
       </motion.div>
 
 
@@ -149,17 +223,12 @@ function App() {
         onUnmount={onUnmount}
         zoom={2}
       >
-
         <Marker
           position={center}
+          visible={markerShown}
+          animation={window.google.maps.Animation.DROP}
         />
-
-
-
-
-
       </GoogleMap>
-
     </motion.div>
 
   ) : <></>
